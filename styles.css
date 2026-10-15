@@ -75,3 +75,8 @@ main{flex:1;min-height:0}.screen{height:100%;display:flex;flex-direction:column}
 }
 @media(max-width:355px){.options-grid-2{grid-template-columns:1fr}.emotion-grid{grid-template-columns:repeat(2,1fr)}.rank-options{grid-template-columns:1fr}.header-label span{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.spinner{animation:none}}
+
+/* Institucional: listado de facultades y Escuela de Gobierno, P3 */
+.faculty-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.faculty-grid .choice{min-height:52px;font-size:13px;text-wrap:pretty}
+@media(max-width:620px){.faculty-grid{grid-template-columns:1fr!important}.faculty-grid .choice{min-height:45px;font-size:13px}}

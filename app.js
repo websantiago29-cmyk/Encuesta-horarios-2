@@ -11,9 +11,10 @@ const QUESTIONS = [
   {id:'P2', section:'Sobre tus estudios', badge:'01', eyebrow:'CARACTERIZACIÓN', type:'single',
    title:'¿En qué etapa de tu pregrado estás?',help:'Piensa en el semestre que cursas actualmente.',
    options:[['1_2','1.º–2.º semestre'],['3_4','3.º–4.º semestre'],['5_6','5.º–6.º semestre'],['7_8','7.º–8.º semestre'],['9_mas','9.º semestre o más']]},
-  {id:'P3', section:'Sobre tus estudios', badge:'01', eyebrow:'CARACTERIZACIÓN', type:'single',
-   title:'¿En qué área se encuentra tu pregrado principal?',help:'Si estudias doble programa, piensa en el que consideres principal.',
-   options:[['admin_econ','Administración o Economía'],['ingenieria','Ingeniería'],['ciencias','Ciencias'],['sociales','Ciencias Sociales, Humanidades o Derecho'],['diseno','Arte, Arquitectura o Diseño'],['educacion','Educación'],['salud','Salud'],['otra','Otra área']]},
+  {id:'P3', section:'Sobre tus estudios', badge:'01', eyebrow:'CARACTERIZACIÓN', type:'faculties',
+   title:'¿A qué facultad o escuela pertenece tu pregrado?',
+   help:'Selecciona la facultad Si cursas más de un programa, selecciona las facultades o escuelas correspondientes. escuela de tu pregrado.',
+   options:[['administracion','Facultad de Administración'],['arquitectura_diseno','Facultad de Arquitectura y Diseño'],['artes_humanidades','Facultad de Artes y Humanidades'],['ciencias','Facultad de Ciencias'],['ciencias_sociales','Facultad de Ciencias Sociales'],['derecho','Facultad de Derecho'],['economia','Facultad de Economía'],['educacion','Facultad de Educación'],['ingenieria','Facultad de Ingeniería'],['medicina','Facultad de Medicina'],['gobierno','Escuela de Gobierno Alberto Lleras Camargo'],['no_se','No estoy seguro/a']]},
   {id:'P4', section:'Cómo planeas', badge:'02', eyebrow:'PLANEACIÓN', type:'timeline',
    title:'¿Cuándo comienzas a pensar qué materias inscribirás el siguiente semestre?',
    help:'Selecciona el momento que mejor describa tu experiencia habitual.',
@@ -79,10 +80,18 @@ function showScreen(name){['welcome','survey','sending','send-error','finish'].f
 function error(message=''){const node=$('#question-error');node.textContent=message;node.hidden=!message;}
 function current(){return QUESTIONS[state.index];}
 function chosen(q){return state.answers[q.id];}
+function facultyLimit(){return ['doble','doble_opciones'].includes(state.answers.P1)?2:1;}
+function facultyHelp(){return facultyLimit()===2?'Puedes seleccionar hasta dos facultades o escuelas. Si ambos pregrados pertenecen a la misma, selecciona solo una.':'Si cursas más de un programa, selecciona las facultades o escuelas correspondientes.';}
+
 function isSelected(q,id){const a=chosen(q);return Array.isArray(a)?a.includes(id):a===id;}
 function singleMarkup(q,{compact=false}={}){
  const a=chosen(q);return `<div class="${q.options.length>6?'options-grid-2':'options-grid-2'}" id="choices" role="group" aria-label="Opciones de respuesta">`+
  q.options.map(([id,label])=>`<button type="button" class="choice ${compact?'compact':''} ${a===id?'selected':''}" data-answer="${esc(id)}" aria-pressed="${a===id}"><span class="dot" aria-hidden="true"></span><span class="labeltext">${esc(label)}</span></button>`).join('')+`</div>`;
+}
+function facultiesMarkup(q){
+ const a=Array.isArray(chosen(q))?chosen(q):[];
+ return `<div class="options-grid-2 faculty-grid" role="group" aria-label="Facultades y escuelas" aria-multiselectable="${facultyLimit()===2}">`+
+ q.options.map(([id,label])=>`<button type="button" class="choice compact ${a.includes(id)?'selected':''}" data-faculty="${esc(id)}" aria-pressed="${a.includes(id)}"><span class="dot ${facultyLimit()===2?'square':''}" aria-hidden="true"></span><span class="labeltext">${esc(label)}</span></button>`).join('')+`</div>`;
 }
 function timelineMarkup(q){return `<div class="timeline-list" role="group" aria-label="Momentos de planeación">${q.options.map(([id,label],i)=>`<button type="button" class="timeline-choice ${isSelected(q,id)?'selected':''}" aria-pressed="${isSelected(q,id)}" data-answer="${id}"><span class="timeline-num" aria-hidden="true">${i+1}</span><span>${esc(label)}</span></button>`).join('')}</div>`;}
 function rankMarkup(q){const a=Array.isArray(chosen(q))?chosen(q):[];return `<div class="rank-slots" aria-label="Orden seleccionado">${[0,1,2].map(i=>{const opt=q.options.find(o=>o[0]===a[i]);return `<div class="rank-slot ${opt?'filled':''}"><small>${i+1}.ª PRIORIDAD</small><span>${opt?esc(opt[1]):'Por elegir'}</span></div>`}).join('')}</div><div class="rank-options" role="group" aria-label="Toca criterios en orden de prioridad">${q.options.map(([id,label])=>{const at=a.indexOf(id);return `<button type="button" class="rank-choice ${at>=0?'picked':''}" aria-pressed="${at>=0}" data-rank="${esc(id)}"><span class="rank-order" aria-hidden="true">${at>=0?at+1:'+'}</span><span>${esc(label)}</span></button>`}).join('')}</div><div class="rank-footer"><p>${a.length} de 3 criterios seleccionados</p><button class="mini-link" data-reset-rank="true" type="button">Reiniciar orden</button></div>`;}
@@ -97,18 +106,26 @@ function emotionMarkup(q){const a=chosen(q);const primary=q.options.slice(0,6),e
 function renderQuestion(){const q=current();const pos=state.index+1;const pct=Math.round(pos/QUESTIONS.length*100);
   $('#progress-section').textContent=q.section;$('#progress-count').textContent=`${pos} de ${QUESTIONS.length}`;
   $('#progress-fill').style.width=pct+'%';$('#progress-aria').setAttribute('aria-valuenow',String(pct));
-  $('#question-eyebrow').textContent=q.eyebrow;$('#question-title').textContent=q.title;$('#question-help').textContent=q.help;
+  $('#question-eyebrow').textContent=q.eyebrow;$('#question-title').textContent=q.type==='faculties'&&facultyLimit()===2?'¿A qué facultad o escuela pertenece el pregrado que cursas?':q.title;$('#question-help').textContent=q.type==='faculties'?facultyHelp():q.help;
   $('#section-circle').textContent=q.badge;$('#section-desc').textContent=q.section;
   const vis=$('#question-visual');vis.innerHTML='';
   if(q.type==='bannerCupos')vis.innerHTML=bannerCuposVisual();
   if(q.type==='schedule')vis.innerHTML=scheduleVisual();
   if(q.type==='bannerInspect')vis.innerHTML=bannerInspectVisual();
-  const target=$('#answer-options');target.className='';target.innerHTML=({single:()=>singleMarkup(q),timeline:()=>timelineMarkup(q),rank:()=>rankMarkup(q),scenario:()=>scenarioMarkup(q),bannerCupos:()=>singleMarkup(q),schedule:()=>singleMarkup(q),emotions:()=>emotionMarkup(q),bannerInspect:()=>inspectMarkup(q),multi:()=>multiMarkup(q)})[q.type]();
-  $('#answer-note').textContent=q.type==='rank'?'Ordena tres criterios':q.max?`Hasta ${q.max} opciones`:'Elige una respuesta';
+  const target=$('#answer-options');target.className='';target.innerHTML=({single:()=>singleMarkup(q),faculties:()=>facultiesMarkup(q),timeline:()=>timelineMarkup(q),rank:()=>rankMarkup(q),scenario:()=>scenarioMarkup(q),bannerCupos:()=>singleMarkup(q),schedule:()=>singleMarkup(q),emotions:()=>emotionMarkup(q),bannerInspect:()=>inspectMarkup(q),multi:()=>multiMarkup(q)})[q.type]();
+  $('#answer-note').textContent=q.type==='faculties'?(facultyLimit()===2?'Hasta dos facultades o escuelas':'Elige una facultad o escuela'):q.type==='rank'?'Ordena tres criterios':q.max?`Hasta ${q.max} opciones`:'Elige una respuesta';
   $('#question-next').textContent=pos===QUESTIONS.length?'Finalizar →':'Continuar →';
   error();
 }
-function setSingle(id){const q=current();state.answers[q.id]=id;track('answer_selected',{value:id});renderQuestion();}
+function setSingle(id){const q=current();
+ if(q.id==='P1'&&state.answers.P1!==id){delete state.answers.P3;}
+ state.answers[q.id]=id;track('answer_selected',{value:id});renderQuestion();}
+function setFaculty(id){const q=current();let a=Array.isArray(chosen(q))?[...chosen(q)]:[];
+ if(a.includes(id))a=a.filter(x=>x!==id);
+ else if(id==='no_se')a=[id];
+ else {a=a.filter(x=>x!=='no_se');if(a.length>=facultyLimit()){if(facultyLimit()===1)a=[id];else {error('Puedes seleccionar hasta dos facultades o escuelas.');return;}}else a.push(id);}
+ state.answers[q.id]=a;track('faculties_selected',{value:[...a]});renderQuestion();}
+
 function setRanking(id){const q=current();const old=Array.isArray(chosen(q))?[...chosen(q)]:[];const ix=old.indexOf(id);if(ix>=0)old.splice(ix,1);else if(old.length<3)old.push(id);else {error('Ya escogiste tres criterios. Quita uno antes de añadir otro.');return;}
   state.answers[q.id]=old;track('priority_order',{value:[...old]});renderQuestion();}
 function setMultiple(id){const q=current();let a=Array.isArray(chosen(q))?[...chosen(q)]:[];const exclusives=q.exclusive||[];
@@ -116,8 +133,9 @@ function setMultiple(id){const q=current();let a=Array.isArray(chosen(q))?[...ch
   else if(exclusives.includes(id))a=[id];
   else {a=a.filter(x=>!exclusives.includes(x));if(q.max&&a.length>=q.max){error(`Puedes escoger hasta ${q.max} opciones. Quita una antes de añadir otra.`);return;}a.push(id);}
   state.answers[q.id]=a;track('answers_selected',{value:[...a]});renderQuestion();}
-$('#answer-options').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-answer'))setSingle(b.dataset.answer);else if(b.hasAttribute('data-rank'))setRanking(b.dataset.rank);else if(b.hasAttribute('data-multi'))setMultiple(b.dataset.multi);else if(b.hasAttribute('data-reset-rank')){state.answers[current().id]=[];track('ranking_reset');renderQuestion();}});
+$('#answer-options').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-answer'))setSingle(b.dataset.answer);else if(b.hasAttribute('data-faculty'))setFaculty(b.dataset.faculty);else if(b.hasAttribute('data-rank'))setRanking(b.dataset.rank);else if(b.hasAttribute('data-multi'))setMultiple(b.dataset.multi);else if(b.hasAttribute('data-reset-rank')){state.answers[current().id]=[];track('ranking_reset');renderQuestion();}});
 function validate(q){const a=chosen(q);if(q.type==='rank')return Array.isArray(a)&&a.length===3?'':'Selecciona tres criterios en orden de importancia.';
+ if(q.type==='faculties')return Array.isArray(a)&&a.length>0&&a.length<=facultyLimit()?'':'Selecciona al menos una facultad o escuela.';
  if(q.type==='multi'||q.type==='bannerInspect')return Array.isArray(a)&&a.length>0?'':'Selecciona al menos una opción.';
  return typeof a==='string'&&a.length>0?'':'Elige una respuesta antes de continuar.';}
 function navigate(delta){if(delta>0){const message=validate(current());if(message){error(message);return;}track('question_confirmed',{value:chosen(current())});}
@@ -129,7 +147,7 @@ $('#question-back').addEventListener('click',()=>navigate(-1));
 $('#welcome-next').addEventListener('click',()=>{if(!$('#consent').checked){$('#welcome-error').textContent='Para comenzar, confirma que aceptas participar.';$('#welcome-error').hidden=false;return;}
  $('#welcome-error').hidden=true;if(!state.startedMs){state.startedAt=new Date().toISOString();state.startedMs=Date.now();track('started');}
  state.stepStart=Date.now();showScreen('survey');renderQuestion();$('#question-title').focus({preventScroll:true});});
-function payload(){return {instrument:'Elaboración de horarios de pregrado · Preguntas interactivas',version:'2.0.0',participant_id:state.sessionId,started_at:state.startedAt,completed_at:new Date().toISOString(),elapsed_seconds:Math.round((Date.now()-state.startedMs)/1000),responses:QUESTIONS.map(q=>({id:q.id,question:q.title,response:state.answers[q.id]??'',time_ms:state.timeSpent[q.id]||0})),events:state.events};}
+function payload(){return {instrument:'Elaboración de horarios de pregrado · Preguntas interactivas',version:'2.1.0',participant_id:state.sessionId,started_at:state.startedAt,completed_at:new Date().toISOString(),elapsed_seconds:Math.round((Date.now()-state.startedMs)/1000),responses:QUESTIONS.map(q=>({id:q.id,question:q.title,response:state.answers[q.id]??'',time_ms:state.timeSpent[q.id]||0})),events:state.events};}
 function sendViaAppsScript(data){return new Promise((resolve,reject)=>{
   const frame=document.createElement('iframe');frame.style.display='none';frame.setAttribute('title','Confirmación de envío');frame.name='survey_receiver_'+Date.now().toString(36);
   const form=document.createElement('form');form.style.display='none';form.target=frame.name;form.method='POST';form.action=STORAGE_URL;form.acceptCharset='UTF-8';

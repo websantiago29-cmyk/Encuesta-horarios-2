@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Instrumento interactivo de investigación sobre decisiones y elaboración de horarios de pregrado.">
+  <title>Elaboración de horarios · Investigación Uniandes</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css?v=2.0.0">
+  <script src="./config.js?v=2.0.0" defer></script>
+  <script src="./app.js?v=2.0.0" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Ir al contenido</a>
+  <div class="app-shell">
+    <header class="site-header">
+      <img class="brand" src="./assets/logo-uniandes.png" alt="Universidad de los Andes" width="188" height="78">
+      <div class="header-label"><span>ELABORACIÓN DE HORARIOS</span><strong>Investigación · Pregrado</strong></div>
+    </header>
+    <main id="main">
+      <section class="screen" id="welcome" aria-labelledby="welcome-title">
+        <div class="screen-scroll"><div class="welcome-grid content-width">
+          <div class="welcome-heading">
+            <p class="eyebrow">Tu experiencia académica</p>
+            <h1 id="welcome-title">¿Cómo elaboras <span class="highlight">tu horario?</span></h1>
+            <p class="intro-lead">Cuéntanos cómo eliges tus materias, qué haces cuando no consigues una sección y qué sabes sobre la inscripción.</p>
+            <div class="meta-row"><span>10–15 minutos aprox.</span><span>14 preguntas</span></div>
+          </div>
+          <div class="welcome-details">
+            <p>Encontrarás preguntas cortas y pequeñas actividades para <strong>ordenar prioridades, comparar situaciones y explorar ejemplos de Banner</strong>. No necesitas inscribir ninguna materia.</p>
+            <p class="muted">La participación es voluntaria. Tus respuestas se utilizarán con fines de investigación y se analizarán conjuntamente.</p>
+            <details class="consent-info"><summary>Información antes de participar</summary>
+              <p>No solicitamos nombres, correos ni códigos estudiantiles. Algunas preguntas presentan situaciones ficticias; las experiencias reales se preguntan por separado.</p>
+              <p>Las respuestas pueden utilizarse para estudiar cómo los estudiantes planean sus horarios y comprenden la información académica.</p>
+            </details>
+            <label class="consent"><input id="consent" type="checkbox"><span>Leí la información y acepto participar voluntariamente.</span></label>
+            <p class="error-text" id="welcome-error" role="alert" hidden></p>
+          </div>
+        </div></div>
+        <nav class="screen-nav"><span class="nav-note">14 preguntas · Una por pantalla</span><button id="welcome-next" type="button" class="button primary">Comenzar <span aria-hidden="true">→</span></button></nav>
+      </section>
+
+      <section class="screen" id="survey" aria-labelledby="question-title" hidden>
+        <div class="progress-area">
+          <div class="progress-meta"><span id="progress-section">Sobre tus estudios</span><span id="progress-count">1 de 14</span></div>
+          <div class="progress-track" role="progressbar" aria-label="Avance de la encuesta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="7" id="progress-aria"><div id="progress-fill"></div></div>
+        </div>
+        <div class="screen-scroll" id="question-scroll">
+          <div class="question-layout content-width">
+            <div class="question-copy">
+              <p class="eyebrow" id="question-eyebrow">CARACTERIZACIÓN</p>
+              <h2 id="question-title" tabindex="-1"></h2>
+              <p class="muted" id="question-help"></p>
+              <div class="section-marker"><span id="section-circle">01</span><span id="section-desc">Sobre tus estudios</span></div>
+            </div>
+            <div class="answer-pane"><div id="question-visual"></div><div id="answer-options"></div><p class="error-text" id="question-error" role="alert" hidden></p></div>
+          </div>
+        </div>
+        <nav class="screen-nav"><button type="button" class="button ghost" id="question-back">← Volver</button><span class="nav-note" id="answer-note"></span><button type="button" class="button primary" id="question-next">Continuar →</button></nav>
+      </section>
+
+      <section class="screen" id="sending" hidden aria-labelledby="sending-title"><div class="screen-scroll"><div class="finish-layout"><div class="spinner" aria-hidden="true"></div><h2 id="sending-title">Enviando tus respuestas</h2><p>Espera un momento mientras se confirma el registro.</p></div></div></section>
+      <section class="screen" id="send-error" hidden aria-labelledby="error-title"><div class="screen-scroll"><div class="finish-layout"><div class="finish-icon warn" aria-hidden="true">!</div><h2 id="error-title">No se pudo confirmar el envío</h2><p>Tus respuestas siguen disponibles en esta pestaña. Puedes intentar enviarlas de nuevo.</p><button type="button" id="retry-send" class="button primary">Volver a intentar →</button></div></div></section>
+      <section class="screen" id="finish" hidden aria-labelledby="finish-title"><div class="screen-scroll"><div class="finish-layout"><div class="finish-icon" aria-hidden="true">✓</div><h2 id="finish-title">¡Gracias por participar!</h2><p id="finish-message">Terminaste el recorrido.</p><button id="start-over" type="button" class="link-button">Empezar de nuevo</button></div></div></section>
+    </main>
+  </div>
+</body>
+</html>
